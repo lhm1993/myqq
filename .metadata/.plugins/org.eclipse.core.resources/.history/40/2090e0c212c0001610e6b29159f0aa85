@@ -1,0 +1,50 @@
+/**
+ * function:该线程用于管理每一个客户端和服务器的连接
+ * 			服务器从与该客户端连接的Socket中不断地阻塞读取信息
+ */
+package com.qq.server.tools;
+
+
+import java.io.*;
+import java.net.*;
+import com.qq.common.*;
+
+public class GetMessageFromClient implements Runnable {
+	
+	Socket s;
+	
+	public GetMessageFromClient(Socket s){
+		 this.s=s;
+	}
+	
+	@Override
+	public void run() {
+		// TODO Auto-generated method stub
+		while(true){
+			//不停的接收从客户端传进来的信息
+			try {
+				Thread.sleep(1000);
+				if(s==null){
+					System.out.println("GetInfoFromClient  ---11111");
+				}
+				ObjectInputStream ois=new ObjectInputStream(s.getInputStream());
+				//每次传过来的都是一个Message包
+				Message m=(Message)ois.readObject();
+				//先将这个连接放在 socketsTable中
+				//System.out.println("  m.getSender()="+m.getSender()+" m.getGetter()="+m.getGetter()+" user.getUserId()="+m.getUser().getUserId()+" m.getPasswd()="+m.getPasswd());
+				(new ServerClientSocketManager()).addSocketToServerClientConnect(m.getUser().getUserId(), s);
+				
+				//System.out.println(m.getUser().getUserId()+" 对应的Socket="+s);
+				
+				//解析Message m ，根据不同的信息类型做出不同的操作
+				UndoMessage um=new UndoMessage(m);
+				
+			} catch (Exception e) {
+				
+				// TODO: handle exception
+				e.printStackTrace();
+				break;
+			}
+		}
+	}
+}

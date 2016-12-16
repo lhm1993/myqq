@@ -1,0 +1,14 @@
+package com.qq.tools;
+
+import static org.junit.Assert.*;
+
+import org.junit.Test;
+
+public class ClientSeverConnectManagerTest {
+
+	@Test
+	public void testGetS() {
+		System.out.println("ss");
+	}
+
+}

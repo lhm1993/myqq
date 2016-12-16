@@ -1,0 +1,92 @@
+/**
+ * function:用来描述在客户端和服务器端互相传递的数据报
+ * MesType 0 表示退出登录，由客户端发向服务器，服务器接收到信息以后
+ * 				关闭掉Socket连接，将s中socketTable中移除，停止服务器接收该端口的线程， 从onLineUsersTable中将在线用户移除
+ * 		   1 接收到的 1 表示登录成功，发送的 1表示这个信息报是登陆请求
+ * 		   2  表示登录失败，由服务器端发给客户端 由客户端解析
+ * 		   3 表示发送的是聊天信息，服务器解析聊天内容以及发送给那些好友
+ * 		   4 表示重复登录
+ * 		   5 由于服务器异常而导致的客户端下线
+ *         
+ */
+package com.qq.common;
+
+import java.io.*;
+import java.util.HashMap;
+import java.util.Vector;
+
+public class Message implements Serializable{
+	private int MesType;//信息包的类型
+	private String sender;//信息的发送者
+	private String getter;//信息的接收者
+	private String content;//信息本身
+	private String timeStamp;//发送时间
+	private User user; //当前用户
+	private String passwd;//当前用户的使用的登录密码
+	private HashMap<String ,Vector<String>> offLineMessage=new HashMap<String ,Vector<String>>();
+	
+	public HashMap<String, Vector<String>> getOffLineMessage() {
+		return offLineMessage;
+	}
+
+	public void setOffLineMessage(HashMap<String, Vector<String>> offLineMessage) {
+		this.offLineMessage = offLineMessage;
+	}
+
+	public String getPasswd() {
+		return passwd;
+	}
+
+	public void setPasswd(String passwd) {
+		this.passwd = passwd;
+	}
+
+	public User getUser() {
+		return user;
+	}
+
+	public void setUser(User user) {
+		this.user = user;
+	}
+
+	public int getMesType() {
+		return MesType;
+	}
+
+	public void setMesType(int mesType) {
+		MesType = mesType;
+	}
+	
+	public String getSender() {
+		return sender;
+	}
+	
+	public void setSender(String sender) {
+		this.sender = sender;
+	}
+	
+	public String getGetter() {
+		return getter;
+	}
+	
+	public void setGetter(String getter) {
+		this.getter = getter;
+	}
+	
+	public String getContent() {
+		return content;
+	}
+	
+	public void setContent(String content) {
+		this.content = content;
+	}
+	
+	public String getTimeStamp() {
+		return timeStamp;
+	}
+	
+	public void setTimeStamp(String timeStamp) {
+		this.timeStamp = timeStamp;
+	}
+
+}

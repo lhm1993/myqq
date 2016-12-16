@@ -1,0 +1,8 @@
+/**
+ * function:¹ÜÀíµÇÂ¼´°¿Ú
+ */
+package com.qq.client.model;
+
+public class ClientManager {
+	public static boolean isOffLine=false;
+}

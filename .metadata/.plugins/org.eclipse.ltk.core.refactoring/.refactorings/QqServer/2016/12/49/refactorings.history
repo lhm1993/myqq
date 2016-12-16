@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Copy element &apos;UndoMessage.java&apos; to &apos;QqClient/src/com.qq.tools&apos;&#x0D;&#x0A;- Original project: &apos;QqServer&apos;&#x0D;&#x0A;- Destination element: &apos;QqClient/src/com.qq.tools&apos;&#x0D;&#x0A;- Original element: &apos;com.qq.server.tools.UndoMessage.java&apos;" description="Copy compilation unit" destination="=QqClient/src&lt;com.qq.tools" element1="/src&lt;com.qq.server.tools{UndoMessage.java" files="0" flags="589830" folders="0" id="org.eclipse.jdt.ui.copy" policy="org.eclipse.jdt.ui.copyResources" stamp="1480559784289" units="1" version="1.0"/>
+</session>

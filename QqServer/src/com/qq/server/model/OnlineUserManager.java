@@ -1,0 +1,23 @@
+/**
+ * function:管理用户的在线状态
+ */
+package com.qq.server.model;
+
+import java.util.*;
+public class OnlineUserManager {
+	
+	public static HashMap<String,String> onLineUsersTable=new HashMap<String,String>();
+
+	public static HashMap<String, String> getOnLineUsersTable() {
+		return onLineUsersTable;
+	}
+
+	public static void addUserToOnLineUsersTable(String userId,String isOnline) {
+		OnlineUserManager.onLineUsersTable.put(userId, isOnline);
+	}
+	
+	public static void removeUserFromOnLineUsersTable(String userId) {
+		OnlineUserManager.onLineUsersTable.remove(userId);
+	}
+	
+}

@@ -1,0 +1,68 @@
+/**
+ * function:解压由客户端发送过来的 Message 包
+ * 提供返回各种信息类型信息的方法
+ */
+package com.qq.server.tools;
+
+import java.io.*;
+import java.net.Socket;
+import java.util.Iterator;
+
+import com.qq.common.Message;
+import com.qq.server.model.OnlineUserManager;
+import com.qq.server.model.TransferMessageFromClientToClient;
+
+public class UndoMessage {
+	Message m;
+	
+	public UndoMessage(Message m){
+		this.m=m;
+		switch(m.getMesType()){
+		//登录信息（具体参考Message类）
+		//判断是否可以登录，，
+		//如果登录失败，就返回一个 MesType=2 的登录失败包，
+		//登录成功，返回一个 MesType=1 的信息，以及用户的好友列表等信息
+		
+		case 1:
+			//1 数据库验证登陆信息
+			LoginCheck lc=new LoginCheck(m);
+			//System.out.println("  m.getSender()="+m.getSender()+" m.getGetter()="+m.getGetter()+" user.getUserId()="+m.getUser().getUserId()+" m.getPasswd()="+m.getPasswd());
+			if(lc.isLoginInfoRight()){
+				//1登录成功，从数据库获取关于该用户的信息,操作的对象是 m
+				//判断是否是重复登录
+				OnlineUserManager oum=new OnlineUserManager();
+				boolean isUserOnline=oum.getOnLineUsersTable().get(m.getSender());
+				if(isUserOnline==true){
+					m.setMesType(4);//重复登录
+				}else{
+					GetInfoFromDataBase gifd=new GetInfoFromDataBase(m);
+					m=gifd.getM();
+					//System.out.println("  m.getSender()="+m.getSender()+" m.getGetter()="+m.getGetter()+" user.getUserId()="+m.getUser().getUserId()+" m.getPasswd()="+m.getPasswd());
+					m.setMesType(1);
+					oum.addUserToOnLineUsersTable(m.getUser().getUserId(), true);
+					
+				}
+			}else {
+				m.setMesType(2);
+				//登录失败，向该客户端返回一个MesType=2 的Message包
+			}
+			
+			//2 向客户端返回 Message m 
+			//交换发送方和接收方
+			String sender=m.getGetter();
+			m.setGetter(m.getSender());
+			m.setSender(sender);
+			SendMessageToClient smtc=new SendMessageToClient(m);
+			smtc.startSendMessage();
+			break;
+			
+		//聊天信息
+		case 3:
+			TransferMessageFromClientToClient tmfctc=new TransferMessageFromClientToClient(m);
+			tmfctc.startTransferMessage();
+			//System.out.println(m.getSender()+" "+m.getGetter()+" **"+m.getContent()+"**");
+			break;
+		}
+	}
+	
+}

@@ -1,0 +1,101 @@
+package com.test;
+
+
+	
+
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import javax.swing.*;
+import java.net.*;
+import java.io.*;
+
+public class Test3 extends JFrame implements ActionListener{
+
+		JPanel jp_sent;//发送面板
+		JScrollPane jsp_showChatMeeage;//显示聊天信息面板
+		JTextArea jta;//聊天信息
+		JTextField jtf;//输入信息窗口
+		JButton jb_sent;//发送按钮
+		String chatMessage="";
+		//用于读取聊天信息
+		PrintWriter pw;
+		Socket s;
+		//构造函数
+		public Test3(){
+			//组件初始化
+			//聊天信息显示初始化
+			jta =new JTextArea();
+			jta.setEditable(false);//双方聊天的信息是不能直接修改的
+			jsp_showChatMeeage=new JScrollPane(jta);
+			jsp_showChatMeeage.setBounds(0,0,285,120);
+			//发送面板初始化
+			jp_sent=new JPanel();
+			jp_sent.setBounds(0,120,200,50);
+			jb_sent=new JButton("发送");
+			//注册监听
+			jb_sent.addActionListener(this);
+			jb_sent.setActionCommand("sent");
+			jtf=new JTextField(10);
+			jp_sent.add(jtf);
+			jp_sent.add(jb_sent);
+			
+			//添加组件 设置布局
+			this.setLayout(null);
+			this.add(jsp_showChatMeeage,"North");
+			this.add(jp_sent,"South");
+			//设置窗口属性
+			this.setTitle("客户端");
+			this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+			this.setLocationRelativeTo(null);
+			this.setSize(300,200);
+			this.setVisible(true);
+		}
+		
+		
+		//发送信息
+		public void sentMessage(){
+			//1 将信息显示在聊天窗口
+			if(jtf.getText().equals("")!=true){//捕捉到发送按钮就发送信息,如果信息不为空
+				if(chatMessage.equals("")==true){
+					//System.out.println("chatMessage_setMessage:"+chatMessage);
+					chatMessage=jtf.getText()+"\n";
+				}else{
+					System.out.println("chatMessage_setMessage_else:"+chatMessage);
+					chatMessage+=(jtf.getText()+"\n");
+				}
+				//将信息发送给连接到该端口的客户端
+				try {
+					pw=new PrintWriter(s.getOutputStream(),true);
+					pw.println(jtf.getText());
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				//System.out.println("chatMessage="+chatMessage);
+				jta.setText(chatMessage);
+				jtf.setText("");
+			}else{
+				JOptionPane.showMessageDialog(this, "信息不能为空");
+			}
+		}
+		
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			// TODO Auto-generated method stub
+			if(e.getActionCommand().equals("sent")){
+				this.sentMessage();
+			}
+		}
+		
+	
+		
+		public static void main(String []args){
+			Test3 mc=new Test3();
+			
+		}
+
+}

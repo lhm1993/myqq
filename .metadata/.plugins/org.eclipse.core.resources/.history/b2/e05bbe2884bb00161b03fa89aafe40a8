@@ -1,0 +1,39 @@
+package com.test;
+
+import java.io.*;
+
+public class Test4 {
+
+	/**
+	 * @param args
+	 */
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+		BufferedWriter osr=null;
+		FileWriter folder=null;
+		//建立文件路径
+		try {
+			folder=new FileWriter("E:\\lianxi\\qqTest\\1\\1.txt");
+			//File file=new File("E:\\lianxi\\qqTest\\1\\1.txt");
+			osr=new BufferedWriter(folder) ;
+			osr.write("\r\nw我是谁");
+		} catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+		}finally{
+			try {
+				if(osr!=null){
+					osr.close();
+					folder.close();
+				}
+			} catch (Exception e2) {
+				// TODO: handle exception
+				e2.printStackTrace();
+			}
+			
+		}
+		
+		
+	}
+
+}

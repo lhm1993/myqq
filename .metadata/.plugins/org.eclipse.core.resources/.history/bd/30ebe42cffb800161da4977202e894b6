@@ -1,0 +1,28 @@
+package com.test;
+
+
+import java.awt.*;
+import javax.swing.*;
+
+public class Test2 extends JFrame{
+	
+	JPanel jp1,jp2;
+	JScrollPane jsp;
+	JButton jb;
+	
+	public Test2(){
+		jb=new JButton("test");
+		jp1=new JPanel();
+		jp2=new JPanel();
+		jp1.add(jb);
+		jsp=new JScrollPane(jp1);
+		jp2.add(jsp);
+		this.add(jp2);
+		this.setSize(400,300);
+		this.setVisible(true);
+	}
+	
+	public static void main(String []args){
+		
+	}
+}

@@ -1,0 +1,10 @@
+1480422492621	Rename package 'com.qq.serverdatabaseconnect'
+1480422501604	Rename package 'com.qq.tool'
+1480423399825	Rename type 'ServerDatabaseConnect'
+1480471598347	Delete element
+1480472502793	Rename type 'ServerClientConnect'
+1480472927640	Rename package 'com.qq.tools'
+1480488982407	Rename compilation unit 'ServerClientConnectManager.java'
+1480489004839	Delete element
+1480489976663	Rename type 'ServerClientConnectManger'
+1480510179896	Rename type 'ReturnMessageToClient'

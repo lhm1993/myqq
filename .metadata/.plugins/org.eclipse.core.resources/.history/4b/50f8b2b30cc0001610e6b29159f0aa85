@@ -1,0 +1,39 @@
+package com.qq.tools;
+
+import java.net.Socket;
+import java.io.*;
+
+import com.qq.client.model.ClientManager;
+import com.qq.common.*;
+
+public class GetMessageFromServer implements Runnable{
+
+	private Socket s;
+	private Message m;
+	
+	//构造函数
+	public GetMessageFromServer(Socket s){
+		this.s=s;
+	}
+	
+	//从服务器接收信息
+	@Override
+	public void run() {
+		// TODO Auto-generated method stub
+		ObjectInputStream ois=null;
+		try {
+			while(true&&ClientManager.isOffLine==false){
+				ois=new ObjectInputStream(s.getInputStream());
+				//从服务器阻塞读取信息
+				m=(Message)ois.readObject();
+				//解析信息
+				//System.out.println("m.getMesType()="+m.getMesType()+"  "+m.getSender()+"对"+m.getGetter()+"说"+m.getContent());
+				UndoMessage um=new UndoMessage(m);
+				//System.out.println("m.getMesType()="+m.getMesType()+" 好友个数="+m.getUser().getFrientdsList().size());
+			}	
+		} catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+		}
+	}
+}

@@ -1,0 +1,350 @@
+/**
+ * function:显示当前用户的好友列表
+ * 在一个窗口上面，显示
+ */
+package com.qq.client.view;
+
+import com.qq.client.model.*;
+import com.qq.common.*;
+import com.qq.tools.GetMessageFromServer;
+import com.qq.tools.InsertOffLineMessageIntoMyMessage;
+
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
+import java.net.Socket;
+import java.sql.PreparedStatement;
+import java.util.*;
+import javax.swing.*;
+
+public class QqList extends JFrame implements ActionListener{
+
+	JPanel jp_welcome,jp_friends,jp_strangers,jp_blacklist;
+	JPanel jp_showFirends,jp_showStrangers,jp_showBlackList;
+	JScrollPane jsp_showList;
+	JButton jb_friends,jb_strangers,jb_blacklist;
+	boolean isShowFriends,isShowStrangers,isShowBlack,isWelcome;
+	User user;
+	Socket s;
+	Message m;
+	//构造函数，根据传进来的用户编号，初始界面
+	public QqList(Message m,Socket s){
+		//Message中包含用户的信息
+		this.m=m;
+		this.s=s;
+		this.user=this.m.getUser();
+		//将当前登录到用户传递进来
+		
+		//启动从服务器接收数据的线程
+		GetMessageFromServer gmfs=new GetMessageFromServer(this.s);
+		Thread t_gmfs=new Thread(gmfs);
+		t_gmfs.start();
+		
+		//将离线信息OffLineMessage 写入到MyMessage中
+		InsertOffLineMessageIntoMyMessage ifimim=new InsertOffLineMessageIntoMyMessage(this.m);
+		ifimim.startGetMessage();
+		
+		//显示欢迎界面
+		this.showWelComePage();
+		
+		//窗口属性
+		this.setTitle(user.getNickName()+" --在线 ");
+		Image image=Toolkit.getDefaultToolkit().getImage(user.getImagePath());
+		this.setIconImage(image);
+		this.setLocationRelativeTo(null);
+		this.setResizable(false);
+		this.setSize(200,500);
+		this.setVisible(true);
+	}
+	
+	//显示欢迎界面
+	private void showWelComePage(){
+		//组件初始化
+		this.removeUsingList();
+		jb_friends=new JButton("好友列表");
+		jb_friends.addActionListener(this);
+		jb_strangers=new JButton("陌生人");
+		jb_strangers.addActionListener(this);
+		jb_blacklist=new JButton("黑名单");
+		jb_blacklist.addActionListener(this);
+				
+		jp_welcome=new JPanel();
+		jp_welcome.setLayout(null);
+		jb_friends.setBounds(0,0,200,30);
+		jb_strangers.setBounds(0,30,200,30);
+		jb_blacklist.setBounds(0,60,200,30);
+				
+		jp_welcome.add(jb_friends);
+		jp_welcome.add(jb_strangers);
+		jp_welcome.add(jb_blacklist);
+		this.add(jp_welcome);
+		this.isWelcome=true;
+		this.setVisible(true);
+	}
+		
+	//初始化好友列表
+	private void initFriendsList(){
+		jp_showFirends=new JPanel();
+		jp_friends=new JPanel();
+		jp_friends.setLayout(null);
+		JLabel []jl=new JLabel[user.getFrientdsList().size()];
+		//遍历好友的 HashMap friendsList
+		//迭代方法,将该用户的好友以及都从服务器传过来的Message m的user的好友列表中读出来
+		Iterator iter=user.getFrientdsList().keySet().iterator(); 
+		Set s=user.getFrientdsList().keySet();
+		int i=0;
+		while(iter.hasNext()){
+			PersonAttribute pa=(PersonAttribute) user.getFrientdsList().get(iter.next());
+			//System.out.println("UserId="+pa.getUserId()+" NickName="+pa.getNickName()+"ImagePath = "+pa.getImagePath());
+			jl[i]=new JLabel(pa.getNickName(),new ImageIcon(pa.getImagePath()),JLabel.LEFT);
+			//每一个标签的位置顺序往后延
+			jl[i].setBounds(5,5+i*35,200,30);
+			this.addMouseListenerToLabels(jl[i]);
+			jp_friends.add(jl[i++]);
+		}
+		
+		jsp_showList=new JScrollPane(jp_friends);
+		//设置显示好友列表的界面布局模式
+		jp_showFirends.setLayout(null);
+		jb_friends.setBounds(0,0,200,30);
+		jsp_showList.setBounds(0,30,200,300);
+		jb_strangers.setBounds(0,330,200,30);
+		jb_blacklist.setBounds(0,360,200,30);
+		//向该界面添加组件
+		jp_showFirends.add(jb_friends);
+		jp_showFirends.add(jsp_showList);
+		jp_showFirends.add(jb_strangers);
+		jp_showFirends.add(jb_blacklist);
+		//将显示好友的界面放到窗口中
+		this.add(jp_showFirends);
+	} 
+	
+	//初始化陌生列表
+	private void intitStangersList(){
+		jp_showStrangers=new JPanel();
+		jp_strangers=new JPanel();
+		jp_strangers.setLayout(null);
+		JLabel []jl=new JLabel[user.getStrangersList().size()];
+
+		Iterator<Map.Entry<String,PersonAttribute>> iter=user.getStrangersList().entrySet().iterator(); 
+		int i=0;
+		while(iter.hasNext()){
+			Map.Entry<String, PersonAttribute> entry=iter.next();
+			PersonAttribute pa=(PersonAttribute)(entry.getValue());
+			//System.out.println("UserId="+pa.getUserId()+" NickName="+pa.getNickName()+"ImagePath = "+pa.getImagePath());
+			jl[i]=new JLabel(pa.getNickName(),new ImageIcon(pa.getImagePath()),JLabel.LEFT);
+			jl[i].setBounds(5,5+i*35,200,30);
+			this.addMouseListenerToLabels(jl[i]);
+			jp_strangers.add(jl[i++]);
+		}
+		
+		jsp_showList=new JScrollPane(jp_strangers);
+		//设置显示Strangers列表的界面布局模式
+		jp_showStrangers.setLayout(null);
+		jb_friends.setBounds(0,0,200,30);
+		jb_strangers.setBounds(0,30,200,30);
+		jsp_showList.setBounds(0,60,200,300);
+		jb_blacklist.setBounds(0,360,200,30);
+		//向该界面添加组件
+		jp_showStrangers.add(jb_friends);
+		jp_showStrangers.add(jsp_showList);
+		jp_showStrangers.add(jb_strangers);
+		jp_showStrangers.add(jb_blacklist);
+		//将显示Strangers的界面放到窗口中
+		this.add(jp_showStrangers);
+	}
+	
+	//初始化黑名单
+	private void intitBlackList(){
+		jp_showBlackList=new JPanel();
+		jp_blacklist=new JPanel();
+		jp_blacklist.setLayout(null);
+		//初始化好友列表
+		JLabel []jl=new JLabel[user.getBlackList().size()];
+		
+		Iterator<Map.Entry<String,PersonAttribute>> iter=user.getBlackList().entrySet().iterator(); 
+		int i=0;
+		while(iter.hasNext()){
+			Map.Entry<String, PersonAttribute> entry=iter.next();
+			PersonAttribute pa=(PersonAttribute)(entry.getValue());
+			//System.out.println("UserId="+pa.getUserId()+" NickName="+pa.getNickName()+"ImagePath = "+pa.getImagePath());
+			if(m.getOffLineMessage()!=null&&m.getOffLineMessage().get(pa.getUserId())!=null){
+				jl[i]=new JLabel(pa.getNickName()+"   "+m.getOffLineMessage().get(pa.getUserId()).size(),new ImageIcon(pa.getImagePath()),JLabel.LEFT);
+			}else{
+				jl[i]=new JLabel(pa.getNickName(),new ImageIcon(pa.getImagePath()),JLabel.LEFT);
+			}
+			
+			jl[i].setBounds(5,5+i*35,200,30);
+			this.addMouseListenerToLabels(jl[i]);
+			jp_blacklist.add(jl[i++]);
+		}
+		jsp_showList=new JScrollPane(jp_blacklist);
+		//设置显示BlackList列表的界面布局模式
+		jp_showBlackList.setLayout(null);
+		jb_friends.setBounds(0,0,200,30);
+		jb_strangers.setBounds(0,30,200,30);
+		jb_blacklist.setBounds(0,60,200,30);
+		jsp_showList.setBounds(0,90,200,300);
+		//向该界面添加组件
+		jp_showBlackList.add(jb_friends);
+		jp_showBlackList.add(jsp_showList);
+		jp_showBlackList.add(jb_strangers);
+		jp_showBlackList.add(jb_blacklist);
+		//将显示BlackList的界面放到窗口中
+		this.add(jp_showBlackList);		
+	}
+	
+	
+	//移除当前在使用的列表
+	private void removeUsingList(){
+		if(isWelcome){
+			this.remove(jp_welcome);
+			isWelcome=false;
+		}
+		if(isShowFriends){
+			this.remove(jp_showFirends);
+			isShowFriends=false;
+		}
+		if(isShowStrangers){
+			this.remove(jp_showStrangers);
+			isShowStrangers=false;
+		}
+		if(isShowBlack){
+			this.remove(jp_showBlackList);
+			isShowBlack=false;
+		}
+		this.setVisible(true);
+	}
+	
+	//显示好友列表
+	private void showFriendsList(){
+		this.removeUsingList();
+		this.initFriendsList();
+		this.isShowFriends=true;
+		this.setVisible(true);
+	}
+	
+	//显示陌生人列表
+	private void showStrangersList(){
+		this.removeUsingList();
+		this.intitStangersList();
+		this.isShowStrangers=true;
+		this.setVisible(true);
+		
+	}
+	
+	//显示黑名单列表
+	private void showBlackList(){
+		this.removeUsingList();
+		this.intitBlackList();
+		this.isShowBlack=true;
+		this.setVisible(true);
+	}
+	
+	//给每一个标签添加鼠标监听事件
+	public void addMouseListenerToLabels(final JLabel jl){
+		jl.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				// TODO Auto-generated method stub
+				if(arg0.getClickCount()==2){
+					//跳出一个聊天界面
+					final String nickName=jl.getText().trim();
+					QqChat qqChat=null;
+					PersonAttribute pa=null;
+					//判断人员类型
+					if(isShowFriends){
+						pa=(PersonAttribute)user.getFrientdsList().get(nickName);
+					}else if(isShowStrangers){
+						pa=(PersonAttribute)user.getStrangersList().get(nickName);				
+					}else if(isShowBlack){
+						pa=(PersonAttribute)user.getBlackList().get(nickName);
+					}
+					//根据当前正在显示的列表确定使用弹出与那些类别好友的聊天窗口
+					//如果当前聊天窗口不存在的话，就创建一个，否则就不做反应
+	
+					if((new ChatWindowManager()).getQqChatWindow(pa.getUserId())==null){
+				
+						//根据不同的人员类型，创建聊天窗口
+						qqChat=new QqChat(user,pa,s);
+						//将窗口放入窗口集合中——聊天框存储形式 <id,qqchat>
+						(new ChatWindowManager()).addQqChatWindowsToManager(pa.getUserId(), qqChat);
+						//当窗口关闭的时候，就将窗口从聊天管理器 ChatWindowManager 所管理的聊天窗口移除这个窗口
+						final PersonAttribute paCloseWindow=pa;
+						
+						qqChat.addWindowListener(new WindowAdapter() {
+							
+							@Override
+							public void windowClosing(WindowEvent e) {
+								// TODO Auto-generated method stub
+								boolean b=false;
+								b=(new ChatWindowManager()).removChatWindowFromManager(paCloseWindow.getUserId());
+								if(b){
+									//关闭聊天窗口的时候，将该用户的聊天信息保存到聊天文件中
+									ChatRecordManager crm=new ChatRecordManager(user,paCloseWindow);
+									crm.startWriteRecord();
+								}else{
+									JOptionPane.showMessageDialog(null, "聊天窗口不存在！");
+								}
+								
+							}
+						});
+		
+					}
+				}
+			}
+			@Override
+			public void mouseEntered(MouseEvent arg0) {
+				// TODO Auto-generated method stub
+				
+				JLabel jl= (JLabel)arg0.getSource();
+				jl.setForeground(Color.CYAN);
+			}
+
+			@Override
+			public void mouseExited(MouseEvent arg0) {
+				// TODO Auto-generated method stub
+				JLabel jl= (JLabel)arg0.getSource();
+				jl.setForeground(Color.BLACK);
+			}
+		});
+	}
+	
+	//监听函数
+	@Override
+	public void actionPerformed(ActionEvent arg0) {
+		// TODO Auto-generated method stub
+		if(arg0.getSource()==jb_friends){
+			if(isShowFriends){
+				this.showWelComePage();
+			}else{
+				this.showFriendsList();
+			}
+			
+		}
+		if(arg0.getSource()==jb_strangers){
+			if(isShowStrangers){
+				this.showWelComePage();
+			}else{
+				this.showStrangersList();
+			}
+		}
+		if(arg0.getSource()==jb_blacklist){
+			if(isShowBlack){
+				this.showWelComePage();
+			}else{
+				this.showBlackList();
+			}
+		}
+		
+	}
+	
+}
